@@ -26,10 +26,10 @@ Linux的每个进程都有各自独立的4G逻辑地址，其中0~3G是用户态
 > * 栈。存储函数的返回地址、参数、局部变量、返回值，向下生长。
 
 ## GCC编译流程
-预处理阶段：hello.c -- "gcc -E预处理，头文件展开，宏替换" --> hello.i
-编译阶段：hello.i -- "gcc -s生成汇编文件" --> hello.s
-汇编阶段：hello.s -- "gcc -c生成二进制文件" --> hello.o
-链接阶段：hello.o -- "调用ld进行链接" --> a.out
+* 预处理阶段：hello.c -- "gcc -E预处理，头文件展开，宏替换" --> hello.i
+* 编译阶段：hello.i -- "gcc -s生成汇编文件" --> hello.s
+* 汇编阶段：hello.s -- "gcc -c生成二进制文件" --> hello.o
+* 链接阶段：hello.o -- "调用ld进行链接" --> a.out
 
 ## 动态库静态库区别及GCC加载库
 静态库
