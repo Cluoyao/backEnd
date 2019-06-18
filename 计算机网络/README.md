@@ -16,9 +16,9 @@
 > * [描述一下HTTP协议](#描述一下HTTP协议)
 > * [HTTP持久连接与管线化](#HTTP持久连接与管线化)
 > * [HTTP协议请求报文具体信息](#HTTP协议请求报文具体信息)
+> * [GET和POST的区别](#GET和POST的区别)
 > * [HTTP协议响应报文具体信息](#HTTP协议响应报文具体信息)
 > * [HTTP状态码](#HTTP状态码)
-> * [GET和POST的区别](#GET和POST的区别)
 > * [浏览器键入URL后的访问流程](#浏览器键入URL后的访问流程)
 > * [HTTP和HTTPS的区别](#HTTP和HTTPS的区别)
 > * [公钥私钥MD5数字签名](#公钥私钥MD5数字签名)
@@ -124,13 +124,14 @@ UDP，全称：用户数据报协议，面向无连接的不安全的报式传�
 * SYN 同步标志位，SYN不能携带数据，必须消耗一个序列号
 * FIN 终止标志位，FIN可以携带数据，必须消耗一个序列号
 
-##TCP三次握手及三次缘由
+## TCP三次握手及三次缘由
 * **为什么TCP三次握手，不能两次或者四次吗？**
     *  三次握手是为了防止，客户端的请求报文在网络滞留，客户端超时重传了请求报文，服务端建立连接，传输数据，释放连接之后，服务器又收到了客户端滞留的请求报文，建立连接一直等待客户端发送数据。
     *  服务器对客户端的请求进行回应(第二次握手)后，就会理所当然的认为连接已建立，而如果客户端并没有收到服务器的回应呢？此时，客户端仍认为连接未建立，服务器会对已建立的连接保存必要的资源，如果大量的这种情况，服务器会崩溃。 
     *  服务器端给客户端发送同步及确认报文时可以合并，四次会浪费时间
     
-##TCP四次挥手及四次缘由
+
+## TCP四次挥手及四次缘由
 四次报文中服务器端发送给客户端的请求关闭连接报文FIN和ACK也是合并的，相对于三次来说，只是前面多了一次ACK的确认。
 
 * **为什么TCP四次挥手，不能三次吗？**
@@ -140,7 +141,7 @@ UDP，全称：用户数据报协议，面向无连接的不安全的报式传�
     * 客户端收到服务器发来的FIN，知道服务器的数据也发送完了，回复ACK， 客户端等待2MSL以后，没有收到服务器传来的任何消息，知道服务器已经收到自己的ACK了，客户端就关闭链接，服务器也关闭链接（服务器比客户端早关闭）。 
 
 
-##TIME-WAIT状态及2MSL时间
+## TIME-WAIT状态及2MSL时间
 * 四次挥手期间，客户端和服务器端都可主动释放连接，谁主动释放，谁将进入TIME_WAIT状态
 * MSL是最长报文寿命，一般为2分钟，2MSL即4分钟
 * 为什么TIME-WAIT状态必须等待2MSL时间？
@@ -183,7 +184,7 @@ DNS解析过程有两种，分别是递归查询和迭代查询。
 * 默认端口80
 * 基于TCP协议 
 
-###HTTP工作原理
+### HTTP工作原理
 HTTP协议定义Web客户端如何从Web服务器请求Web页面，以及服务器如何把Web页面传送给客户端。
 
 * 客户端向服务器发送一个请求报文，请求报文包含请求的方法、URL、协议版本、请求头部和请求数据。
@@ -224,9 +225,70 @@ HTTP协议首先要和服务器建立TCP连接，这需要三次握手。
 
 
 ## HTTP协议请求报文具体信息
+HTTP请求报文由请求行（request line）、请求头部（header）、空行和请求数据四个部分组成
+
+* **GET**
+    ```C++
+    GET /562f25980001b1b106000338.jpg HTTP/1.1
+    Host:img.mukewang.com
+    User-Agent:Mozilla/5.0 (Windows NT 10.0; WOW64)
+    AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36
+    Accept:image/webp,image/*,*/*;q=0.8
+    Referer:http://www.imooc.com/
+    Accept-Encoding:gzip, deflate, sdch
+    Accept-Language:zh-CN,zh;q=0.8
+    空行
+    请求数据为空
+    ```
+
+* **POST**
+    ```C++
+    POST / HTTP1.1
+    Host:www.wrox.com
+    User-Agent:Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 2.0.50727; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022)
+    Content-Type:application/x-www-form-urlencoded
+    Content-Length:40
+    Connection: Keep-Alive
+    空行
+    name=Professional%20Ajax&publisher=Wiley
+    ```
+
+> * **请求行**，用来说明请求类型,要访问的资源以及所使用的HTTP版本.
+GET说明请求类型为GET，/562f25980001b1b106000338.jpg(URL)为要访问的资源，该行的最后一部分说明使用的是HTTP1.1版本。
+> * **请求头部**，紧接着请求行（即第一行）之后的部分，用来说明服务器要使用的附加信息
+    * HOST，给出请求资源所在服务器的域名.
+    * User-Agent，HTTP客户端程序的信息，该信息由你发出请求使用的浏览器来定义,并且在每个请求中自动发送等
+    * Accept，说明用户代理可处理的媒体类型
+    * Accept-Encoding，说明用户代理支持的内容编码
+    * Accept-Language，说明用户代理能够处理的自然语言集
+    * Content-Type，说明实现主体的媒体类型
+    * Content-Length，说明实现主体的大小
+    * Connection，连接管理，可以是Keep-Alive或close
+> * **空行**，请求头部后面的空行是必须的即使第四部分的请求数据为空，也必须有空行。
+> * **请求数据**也叫主体，可以添加任意的其他数据。
+
+## GET和POST区别
 
 
 ## HTTP协议响应报文具体信息
+HTTP响应也由四个部分组成，分别是：状态行、消息报头、空行和响应正文。
+```C++
+HTTP/1.1 200 OK
+Date: Fri, 22 May 2009 06:07:21 GMT
+Content-Type: text/html; charset=UTF-8
+<html>
+      <head></head>
+      <body>
+            <!--body goes here-->
+      </body>
+</html>
+```
+> * 状态行，由HTTP协议版本号， 状态码， 状态消息 三部分组成。
+第一行为状态行，（HTTP/1.1）表明HTTP版本为1.1版本，状态码为200，状态消息为OK
+> * 消息报头，用来说明客户端要使用的一些附加信息
+第二行和第三行为消息报头，Date:生成响应的日期和时间；Content-Type:指定了MIME类型的HTML(text/html),编码类型是UTF-8
+> * 空行，消息报头后面的空行是必须的
+> * 响应正文，服务器返回给客户端的文本信息。空行后面的html部分为响应正文
 
 
 ## HTTP状态码
@@ -244,8 +306,6 @@ HTTP协议首先要和服务器建立TCP连接，这需要三次握手。
 * 5xx：服务器端错误--服务器处理请求出错。 
     * 500 Internal Server Error：服务器在执行请求时出现错误
     * 503 Service Unavaliable：服务器正在停机维护
-
-## GET和POST区别
 
 
 ## 浏览器键入URL后的访问流程
