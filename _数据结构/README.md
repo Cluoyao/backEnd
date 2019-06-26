@@ -180,9 +180,13 @@ H(10100(二进制)) = H(20) = 4
 
 * 跳表
     14 &emsp;&ensp; &emsp;&emsp;&ensp;→&ensp;&emsp;&emsp;&emsp;&emsp;50
+
     &ensp;↓&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;↓
+    
     14&emsp;&emsp;→&emsp;&ensp;34&emsp;&ensp;→&emsp;&emsp;50&emsp;&ensp;→&emsp;&emsp;66
+    
     &ensp;↓&emsp;&emsp;&emsp;&emsp;&emsp;↓&emsp;&emsp;&emsp;&emsp;&emsp;↓&emsp;&emsp;&emsp;&emsp;&emsp;↓
+    
     14 → 23 → 34 → 43 → 50 → 59 → 66 → 72 
 
 ### 跳表和红黑树的对比
