@@ -167,7 +167,7 @@ H(10100(二进制)) = H(20) = 4
 * 取其他合数时，都会不同程度的导致c的某些位”失效”，从而在一些常见应用中导致冲突．
 * 取质数，基本可以保证c的每一位都参与H( c )的运算，从而在常见应用中减小冲突几率．
 
-## 跳表
+## [跳表](https://www.cnblogs.com/a8457013/p/8251967.html)
 * 查找时间复杂度O(logn)，插入、删除时间复杂度O(logn)
 * 用于有序链表的查找，类似二分查找操作的链表
 
@@ -179,7 +179,15 @@ H(10100(二进制)) = H(20) = 4
     * 原始链表查找复杂度O(n)
 
 * 跳表
-
+    * 性质 
+        * 由很多层结构组成
+        * 每一层都是一个有序的链表
+        * 最底层(Level 1)的链表包含所有元素
+        * 如果一个元素出现在 Level i 的链表中，则它在 Level i 之下的链表也都会出现。
+        * 每个节点包含两个指针，一个指向同一链表中的下一个元素，一个指向下面一层的元素。
+    
+    * 原始链表转换成跳表
+    
     14 &emsp;&ensp; &emsp;&emsp;&ensp;→&ensp;&emsp;&emsp;&emsp;&emsp;50
 
     &ensp;↓&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;↓
@@ -188,7 +196,9 @@ H(10100(二进制)) = H(20) = 4
     
     &ensp;↓&emsp;&emsp;&emsp;&emsp;&emsp;↓&emsp;&emsp;&emsp;&emsp;&emsp;↓&emsp;&emsp;&emsp;&emsp;&emsp;↓
     
-    14&nbsp;&nbsp;→&nbsp;23&nbsp;&nbsp;→&nbsp;34&nbsp;&nbsp;→&nbsp;43&nbsp;&nbsp;→&nbsp;50&nbsp;&nbsp;→&nbsp;59&nbsp;&nbsp;→&nbsp;66&nbsp;&nbsp;→&nbsp;&nbsp;72 
+    14&nbsp;&nbsp;→&nbsp;23&nbsp;&nbsp;→&nbsp;34&nbsp;&nbsp;→&nbsp;43&nbsp;&nbsp;→&nbsp;50&nbsp;&nbsp;→&nbsp;59&nbsp;&nbsp;→&nbsp;66&nbsp;&nbsp;→&nbsp;&nbsp;72
+
+
 
 ### 跳表和红黑树的对比
 * 插入、删除、查找以及迭代输出有序序列这几个操作，红黑树也可以完成，时间复杂度和跳表是一样
