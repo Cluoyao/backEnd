@@ -179,10 +179,10 @@ H(10100(二进制)) = H(20) = 4
     * 原始链表查找复杂度O(n)
 
 * 跳表
-    * 14$~~~~~~~~~~~~~~~~$→$~~~~~~~~~~~~~~$50
-    $~$↓$~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~$↓
-    14$~~~~~~$→$~~~~~$34$~~~~~~$→$~~~~~$50$~~~~~~$→$~~~~~~$66
-    $~$↓$~~~~~~~~~~~~~~~~$↓$~~~~~~~~~~~~~~~~~$↓$~~~~~~~~~~~~~~~~~$↓
+    14 &emsp;&ensp; &emsp;&emsp;&ensp;→&ensp;&emsp;&emsp;&emsp;&emsp;50
+    &ensp;↓&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;↓
+    14&emsp;&emsp;→&emsp;&ensp;34&emsp;&ensp;→&emsp;&emsp;50&emsp;&ensp;→&emsp;&emsp;66
+    &ensp;↓&emsp;&emsp;&emsp;&emsp;&emsp;↓&emsp;&emsp;&emsp;&emsp;&emsp;↓&emsp;&emsp;&emsp;&emsp;&emsp;↓
     14 → 23 → 34 → 43 → 50 → 59 → 66 → 72 
 
 ### 跳表和红黑树的对比
