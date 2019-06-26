@@ -188,7 +188,7 @@ H(10100(二进制)) = H(20) = 4
     
     &ensp;↓&emsp;&emsp;&emsp;&emsp;&emsp;↓&emsp;&emsp;&emsp;&emsp;&emsp;↓&emsp;&emsp;&emsp;&emsp;&emsp;↓
     
-    14&nbsp;&nbsp;→&nbsp;&nbsp;23&nbsp;&nbsp;→&nbsp;&nbsp;34&nbsp;&nbsp;→&nbsp;&nbsp;43&nbsp;&nbsp;→&nbsp;&nbsp;50&nbsp;&nbsp;→&nbsp;&nbsp;59&nbsp;&nbsp;→&nbsp;&nbsp;66&nbsp;&nbsp;→&nbsp;&nbsp;72 
+    14&nbsp;&nbsp;→&nbsp;23&nbsp;&nbsp;→&nbsp;34&nbsp;&nbsp;→&nbsp;43&nbsp;&nbsp;→&nbsp;50&nbsp;&nbsp;→&nbsp;59&nbsp;&nbsp;→&nbsp;66&nbsp;&nbsp;→&nbsp;&nbsp;72 
 
 ### 跳表和红黑树的对比
 * 插入、删除、查找以及迭代输出有序序列这几个操作，红黑树也可以完成，时间复杂度和跳表是一样
