@@ -179,6 +179,7 @@ H(10100(二进制)) = H(20) = 4
     * 原始链表查找复杂度O(n)
 
 * 跳表
+
     14 &emsp;&ensp; &emsp;&emsp;&ensp;→&ensp;&emsp;&emsp;&emsp;&emsp;50
 
     &ensp;↓&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;↓
