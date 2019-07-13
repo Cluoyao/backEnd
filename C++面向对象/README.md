@@ -292,7 +292,7 @@ void test01(){
     cout << sizeof(Son) << endl;    //sheep-Vbptr,m_sheep,camel-Vbptr,m_camel,m_son,m_Age
 }
 ```
-<div align=center><img width="240" height="170" src="https://github.com/qinguoyi/Extract-inner-image/blob/master/Complex-Example/dst.png"/></div>
+<div align=center><img width="640" height="450" src="https://github.com/qinguoyi/backEnd/blob/master/utils/%E8%8F%B1%E5%BD%A2%E7%BB%A7%E6%89%BF.png"/></div>
 
 > * **特别注意：**此时son没有自己的虚基类表和虚基类指针，只是继承了sheep和camel的虚基类指针和虚基类表，只是修改了两个虚基类表中的值，修改为当前类中，如何通过继承的虚基类指针查找虚基类数据
 > * Son继承Sheep父类，父类中有虚基类指针vbptr(virtual base pointer)，对象结构类似结构体，首元素是虚基类指针，其余为自身数据（不包括静态成员和成员函数）
@@ -324,7 +324,7 @@ void test01(){
 }
 ```
 
-<div align=center><img width="240" height="170" src="https://github.com/qinguoyi/Extract-inner-image/blob/master/Complex-Example/dst.png"/></div>
+<div align=center><img width="640" height="600" src="https://github.com/qinguoyi/backEnd/blob/master/utils/%E5%A4%9A%E8%99%9A%E7%BB%A7%E6%89%BF.png"/></div>
 
 > * 注意跟上面的区别，一个是son类中的元素顺序，一个是son类有了自己的虚基类指针和虚基类表
 
@@ -450,6 +450,7 @@ void test01(){
 两者主要的区别：函数地址是早绑定（静态联编）还是晚绑定（动态联编）。即，在编译阶段确定好地址还是在运行时才确定地址。
 
 ## 虚函数指针和虚函数表
+> * 每个类中都有虚函数表
 > * 虚函数重写（覆盖）的实质就是重写父类虚函数表中的父类虚函数地址；
 > * 实现多态的流程：虚函数指针->虚函数表->函数指针->入口地址，**虚函数表（vftable）属于类**，或者说这个类的所有对象共享一个虚函数表；**虚函数指针（vfptr）属于单个对象**。
 > * 在程序调用时，先创建对象，编译器在对象的内存结构头部添加一个虚函数指针，进行动态绑定，虚函数指针指向对象所属类的虚函数表。
