@@ -50,11 +50,11 @@ struct A{
 
 * 内存对齐规则
     * 对于结构的各个成员，第一个成员位于偏移为0的位置，以后的每个数据成员的偏移量必须是  min(#pragma pack()指定的数,这个数据成员的自身长度)的倍数
-    * 在所有的数据成员完成各自对齐之后，结构或联合体本身也要进行对齐，对齐将按照 #pragram pack指定的数值和结构或者联合体最大数据成员长度中比较小的那个，也就是  min(#pragram pack() , 长度最长的数据成员)
+    * 在所有的数据成员完成各自对齐之后，结构或联合体本身也要进行对齐，对齐将按照 #pragam pack指定的数值和结构或者联合体最大数据成员长度中比较小的那个，也就是  min(#pragram pack() , 长度最长的数据成员)
     
 * 需要对齐的原因
     * 平台原因（移植原因）：不是所有的硬件平台都能访问任意地址上的任意数据，某些硬件平台只能在某些地址处取某些特定类型的数据，否则抛出硬件异常
-    * 硬件原因：经过内存对齐之后，CPU的内存访问速度大大提升。访问未对齐的内存，处理器要访问两次（数据先读高位，再度地位），访问对齐的内存，处理器只要访问一次，为了提高处理器读取数据的效率，我们使用内存对齐
+    * 硬件原因：经过内存对齐之后，CPU的内存访问速度大大提升。访问未对齐的内存，处理器要访问两次（数据先读高位，再读低位），访问对齐的内存，处理器只要访问一次，为了提高处理器读取数据的效率，我们使用内存对齐
 
 ## 面向对象三大特性
 通过类创建一个对象的过程叫实例化，实例化后使用对象可以调用类成员函数和成员变量，其中类成员函数称为行为，类成员变量称为属性。类和对象的关系：类是对象的抽象，对象是类的实例
@@ -120,7 +120,7 @@ struct A{
 拷贝构造函数的参数必须加const，因为防止修改，本来就是用现有的对象初始化新的对象。
 
 * 拷贝构造函数的使用时机
-    * 使用已经创建好的对象初始化新对象
+    * 使用已经创建好的对象初始化新对象 `A a; A b = a; A c(a); b = c;//b = c不是初始化，调用赋值运算符 `
     * 以值传递的方式来给函数参数传值
     * 以值方式返回局部对象（不常用，一般不返回局部对象） 
 
@@ -262,9 +262,8 @@ const int  int::operator(int)
 两个子类继承于同一个父类，同时又有另外一个类多继承于两个子类，这种继承称为菱形继承。比如羊和驼继承于动物类，同时羊驼继承于羊和驼。
 
 #### 菱形继承会产生问题
-* **子类会继承父类的成员属性，但两者之间不会相互修改.** 羊和驼都继承了动物类的数据和函数，修改sheep不会修改animal的age属性.
-* 同样，羊驼调用数据和函数时，会出现二义性，通过sheep类得到一个age，通过carmel类得到一个age，两个数据不会相互影响，相互修改
-* 羊驼继承了两份动物类中的某些数据和函数，但只需要一份即可
+* **浪费空间。**羊驼继承了两份动物类中的某些数据和函数，但只需要一份即可
+* **二义性。从不同途径继承来的同名的数据成员在内存中有不同的拷贝造成数据不一致问题。** 羊驼调用数据和函数时，会出现二义性，通过sheep类得到一个age，通过carmel类得到一个age，两个数据不会相互影响，相互修改，导致同一份数据不一致。
 
 
 #### 解决菱形继承的问题
@@ -275,30 +274,65 @@ public:
     int m_Age;
 };
 class Sheep:virtual public Animal{
-
+    int m_sheep;
 };
 class Camel :virtual public Animal{
-
+    int m_camel;
 };
 
 class Son :public Sheep, public Camel{
-
+    int m_son
 };
 void test01(){
     Son son;
     son.m_Age = 10;
+    cout << sizeof(Animal) << endl; //m_Age
+    cout << sizeof(Sheep) << endl;  //sheep-Vbptr,m_sheep,m_Age
+    cout << sizeof(Camel) << endl;  //camel-Vbptr,m_camel,m_Age
+    cout << sizeof(Son) << endl;    //sheep-Vbptr,m_sheep,camel-Vbptr,m_camel,m_son,m_Age
+}
+```
+<div align=center><img width="240" height="170" src="https://github.com/qinguoyi/Extract-inner-image/blob/master/Complex-Example/dst.png"/></div>
+
+> * **特别注意：**此时son没有自己的虚基类表和虚基类指针，只是继承了sheep和camel的虚基类指针和虚基类表，只是修改了两个虚基类表中的值，修改为当前类中，如何通过继承的虚基类指针查找虚基类数据
+> * Son继承Sheep父类，父类中有虚基类指针vbptr(virtual base pointer)，对象结构类似结构体，首元素是虚基类指针，其余为自身数据（不包括静态成员和成员函数）
+> * Sheep的虚指针指向下面Sheep的虚基类表vbtale@Sheep(virtual base table)，虚基类表是一个整型数组，数组第二个元素值为20，即Sheep的虚指针地址偏移20指向Animal的m_Age地址。Camel父类同理，因此，类中只有一个m_Age元素。
+> * Son中包含了两个指针和四个int类型，所以大小为24。
+
+```C++
+class Animal{
+public:
+    int m_Age;
+};
+class Sheep:virtual public Animal{
+    int m_sheep;
+};
+class Camel :virtual public Animal{
+    int m_camel;
+};
+
+class Son :virtual public Sheep, virtual public Camel{
+    int m_son
+};
+void test01(){
+    Son son;
+    son.m_Age = 10;
+    cout << sizeof(Animal) << endl; //m_Age
+    cout << sizeof(Sheep) << endl;  //sheep-Vbptr,m_sheep,m_Age
+    cout << sizeof(Camel) << endl;  //camel-Vbptr,m_camel,m_Age
+    cout << sizeof(Son) << endl;    //son-vbptr,m_son,m_Age,sheep-Vbptr,m_sheep,camel-Vbptr,m_camel,
 }
 ```
 
-> * Son继承Sheep父类，父类中有虚基类指针vbptr(virtual base pointer)，对象结构类似结构体，首元素是虚基类指针，其余为自身数据（不包括静态成员和成员函数）
-> * Sheep父类的虚指针指向下面Sheep的虚基类表vbtale@Sheep(virtual base table)，虚基类表是一个整型数组，数组第二个元素值为8，即Sheep的虚指针地址偏移8指向Animal的m_Age地址。Camel父类同理，因此，类中只有一个m_Age元素。
-> * Son中包含了两个指针和一个int类型，所以大小为12。
+<div align=center><img width="240" height="170" src="https://github.com/qinguoyi/Extract-inner-image/blob/master/Complex-Example/dst.png"/></div>
+
+> * 注意跟上面的区别，一个是son类中的元素顺序，一个是son类有了自己的虚基类指针和虚基类表
 
 * 虚继承
-    * 一般通过虚基类指针和虚基类表实现
-    * 每个虚继承的子类都有一个虚基类指针（占用一个指针的存储空间）和虚基类表（不占用类对象的存储空间），**虚基类指针属于对象，虚基类表属于类**
+    * 一般通过虚基类指针和虚基类表实现，将共同基类设置为虚基类
+    * **每个虚继承的子类（虚基类本身没有）**都有一个虚基类指针（占用一个指针的存储空间）和虚基类表（不占用类对象的存储空间），**虚基类指针属于对象，虚基类表属于类**
     * 当虚继承的子类被当做父类继承时，虚基类指针也会被继承。
-    * 虚表中记录了虚基类与本类的偏移地址,通过虚基类表的地址索引输出虚基类指针的偏移量及虚基类数据
+    * 虚表中只记录了虚基类数据在派生类对象中与派生类对象首地址(虚基类指针)之间的偏移量,以此来访问虚基类数据
     * 虚继承不用像普通多继承那样维持着公共基类（虚基类）的两份同样的拷贝，节省了存储空间。
     * 虚基类表本质是一个**整型数组**
 
@@ -306,7 +340,7 @@ void test01(){
 不可以，因为虚函数属于对象，不属于类，静态函数属于类
 
 ## 类型兼容性原则 为什么会有多态
-类型兼容规则是指在需要基类对象的任何地方，都可以使用公有派生类的对象来替代,如使用**子类对象可以直接赋值给父类对象**或**子类对象可以直接初始化父类对象时**，**不管传入子类还是父类对象，都是调用的父类函数**.
+类型兼容规则是指在需要基类对象的任何地方，都可以使用公有派生类的对象来替代,如使用子类对象可以直接赋值给父类对象或子类对象可以直接初始化父类对象时，**对于同样的一条语句，不管传入子类还是父类对象，都是调用的父类函数，但我们想实现的是同样的一条语句，传入不同的对象，调用不同的函数**.
 ```C++
 class Animal{
 public:
