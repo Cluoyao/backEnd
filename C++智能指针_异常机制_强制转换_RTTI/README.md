@@ -33,7 +33,7 @@
 > * 如果客户需要对某个操作函数运次期间抛出的异常做出反应，class应该提供普通函数执行该操作，而非在析构函数中。
 
 ## [智能指针](https://www.cnblogs.com/TianFang/archive/2008/09/20/1294590.html)
-智能指针有shared_ptr,weak_ptr,unique_ptr，[参考](https://www.cnblogs.com/wxquare/p/4759020.html)
+智能指针有shared_ptr,weak_ptr,unique_ptr，[参考](https://www.cnblogs.com/wxquare/p/4759020.html)，使用普通指针，容易造成堆内存泄露（忘记释放），二次释放，程序发生异常时内存泄露等问题等，使用智能指针能更好的管理堆内存。
 
 * share_ptr核心要理解引用计数，什么时候销毁底层指针，还有赋值，拷贝构造时候的引用计数的变化，析构的时候要判断底层指针的引用计数为0了才能真正释放底层指针的内存
    * 不能将指针直接赋值给一个智能指针，一个是类，一个是指针。例如`std::shared_ptr<int> p4 = new int(1);`
