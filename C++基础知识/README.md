@@ -4,7 +4,7 @@
 > * [指针数组和数组指针](#指针数组和数组指针)
 > * [字符数组和字符串常量](#字符数组和字符串常量)
 > * [引用和指针的区别](#引用和指针的区别)
-> * [C++中class和struct的区别](#C++中class和struct的区别)
+> * [C++中class和struct的区别](#C中class和struct的区别)
 > * [new/delete和malloc/free区别](#new/delete和malloc/free区别)
 > * [new运算符的原理](#new运算符的原理)
 > * [malloc的内存分配机制](#malloc的内存分配机制)
@@ -67,7 +67,7 @@ const char \*arr2="hello"; //字符串hello保存在常量区，const本来是�
 > * **多级指针，一级引用.** 指针可以有多级指针（\*\*p），而引用只有一级
 
 ## C++中class和struct的区别
-C++中的struct对C中的struct进行了扩充，它已经不再只是一个包含不同数据类型的数据结构了，它已经获取了太多的功能。struct能包含成员函数吗？ 能！struct能继承吗？ 能！！struct能实现多态吗？ 能！！！
+C中的strcut不能有函数，但C++中可以。C++中的struct对C中的struct进行了扩充，它已经不再只是一个包含不同数据类型的数据结构了，它已经获取了太多的功能。struct能包含成员函数吗？ 能！struct能继承吗？ 能！！struct能实现多态吗？ 能！！！
 > * **默认的继承访问权限.** struct是public的，class是private的
     class B : public A就是为了指明是public继承，而不是用默认的private继承，若class B : A则是private继承
 > * **定义模板参数.** class这个关键字还用于定义模板参数，就像typename。但关键字struct不用于定义模板参数。
