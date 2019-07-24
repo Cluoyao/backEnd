@@ -5,8 +5,8 @@
 > * [TCP中的accept和connect和listen的关系](#TCP中的accept和connect和listen的关系)
 > * [UDP中的connect](#UDP中的connect)
 > * [广播和组播过程](#广播和组播过程)
-> * [大量TIMEOUT或CLOSEWAIT状态](#大量TIMEOUT或CLOSEWAIT状态)
-> * [实现优雅关闭](#实现优雅关闭)
+> * [服务端大量TIMEWAIT或CLOSEWAIT状态](#服务端大量TIMEWAIT或CLOSEWAIT状态)
+> * [优雅关闭和半关闭](#优雅关闭和半关闭)
 > * [解决TCP粘包](#解决TCP粘包)
 > * [select可以判断网络断开吗](#select可以判断网络断开吗)
 > * [send和read的阻塞和非阻塞情况](#send和read的阻塞和非阻塞情况)
@@ -59,7 +59,7 @@
 * 注意
     * sendto和recvfrom的第56个参数是sock地址
         * 服务器端的recvfrom和sendto都是cli地址
-        * 客户端sendto是服务器端的地址，recvfrom是新建的from地址
+        * 客户端sendto是服务器端的地址，最后一个参数是指针，recvfrom是新建的from地址，最后一个参数是整型
     * UDP不用listen，accept，因为UDP无连接
     * UDP通过sendto函数完成套接字的地址分配工作
         * 第一阶段：向UDP套接字注册IP和端口号
@@ -137,14 +137,58 @@ UDP的connect和TCP的connect完全不同，UDP不会引起三次握手
 * 组播
 	* 适用于局域网和广域网（internet） 
 
-## 大量TIMEOUT或CLOSEWAIT状态
+## 服务端大量TIMEWAIT或CLOSEWAIT状态
+首先通过TCP的四次挥手过程分析确定两个状态的出现背景。TIMEWAIT是大量tcp短连接导致的，确保对方收到最后发出的ACK，一般为2MSL；CLOSEWAIT是tcp连接不关闭导致的，出现在close()函数之前。
+### TIMEWAIT
+* 可以通过设置SOCKET选项SO_REUSEADDR来重用处于TIMEWAIT的sock地址，对应于内核中的tcp_tw_reuse，这个参数不是“消除” TIME_WAIT的，而是说当资源不够时，可以重用TIME_WAIT的连接
+* 修改ipv4.ip_local_port_range，增大可用端口范围，来承受更多TIME
+* 设置SOCK选项SO_LINGER选项，这样会直接消除TIMEWAIT
 
-## 实现优雅关闭
+### CLOSEWAIT
+客户端主动关闭，而服务端没有close关闭连接，则服务端产生大量CLOSEWAIT，一般都是业务代码有问题
+
+## 优雅关闭和半关闭
+### 概念
+* 一个文件描述符关联一个文件，这里是网络套接字。
+* 关闭socket是指关闭用户应用程序中的socket句柄，释放相关资源。
+* 关闭TCP连接，是关闭网络套接字，断开连接
+* close只是减少引用计数，只有当引用计数为0的时候，才发送fin，真正关闭连接
+* shutdown不同，只要以SHUT_WR/SHUT_RDWR方式调用即发送FIN包
+* shutdown和close只需要一个
+* 保持连接的某一端想关闭连接了，但它**需要确保要发送的数据全部发送完毕以后才断开连接**，此种情况下需要使用优雅关闭，一种是shutdown，一种是设置SO_LINGER的close
+* 半关闭，是关闭写端，但可以读对方的数据，这种只能通过shutdown实现
+
+### close
+close函数会关闭文件描述符，不会立马关闭网络套接字，除非引用计数为0，则会触发调用关闭TCP连接。
+
+* 若有多个进程调用同一个网络套接字，会将网络套接字的文件描述符+1，close调用只是将当前套接字的文件描述符-1，只会对当前的进程有效，只会关闭当前进程的文件描述符，其他进程同样可以访问该套接字
+* close函数的默认行为是，关闭一个socket，close将立即返回，TCP模块尝试把该socket对应的TCP缓冲区中的残留数据发送给对方，并不保证能到达对方
+* close行为可以通过SO_LINGER修改
+```C++
+struct linger{
+    int l_onoff;    //开启或关闭该选项
+    int l_linger;   //滞留时间
+}
+```
+* l_onoff为0，该选项不起作用，采用默认close行为
+* l_onoff不为0
+    * l_linger为0，close立即返回，TCP模块丢弃被关闭的socket对应的TCP缓冲区中的数据，给对方发送RST复位信号，这样可以异常终止连接，且完全消除了TIME_WAIT状态
+    * l_linger不为0
+        * 阻塞socket，被关闭的socket对应TCP缓冲区，若还有数据，close会阻塞，进程睡眠，直到收到对方的确认或等待l_linger时间，若超时仍未收到确认，则close返回-1设置errno为EWOULDBLOCK
+        * 非阻塞socket，close立即返回，需要根据返回值和errno判断残留数据是够发送完毕
+
+### shutdown
+shutdown没有采用引用计数的机制，会影响所有进程的网络套接字，可以只关闭套接字的读端或写端，也可全部关闭，用于实现半关闭
+
+* SHUT_RD，关闭sockfd上的读端，不能再对sockfd文件描述符进行读操作，且接收缓冲区中的所有数据都会丢弃
+* SHUT_WR，关闭写端，确保发送缓冲区中的数据会在真正关闭连接之前会发送出去，不能对其进行写操作，连接处于半关闭状态
+* SHUT_RDWR，同时关闭sockfd的读写
 
 ## 解决TCP粘包
 ### 什么是TCP粘包
-
+由于TCP是流协议，因此TCP接收不能确保每次一个包，有可能接收一个包和下一个包的一部分。
 ### 如何解决
+包头和包体，包头中有包体长度
 
 ## select可以直接判断网络断开吗
 不可以。若网络断开，select检测描述符会发生读事件，这时调用read函数发现读到的数据长度为0.
@@ -189,11 +233,14 @@ send函数返回100，并不是将100个字节的数据发送到网络上或对�
     * ntohl 网络序转主机序
     * ntohs 网络序转主机序
 
-## IP地址分类及转换
+## [IP地址分类及转换](https://blog.csdn.net/kzadmxz/article/details/73658168)
 ### IP地址分类
 
 ### IP转换
-点分十进制转换成
+字符串表示的点分十进制转换成网络字节序的IP地址
+
+* pton，点分十进制转换成地址
+* ntop，地址转换成点分十进制
  
 ## [select实现异步connect](https://blog.csdn.net/nphyez/article/details/10268723)
 通常阻塞的connect 函数会等待三次握手成功或失败后返回，0成功，-1失败。如果对方未响应，要隔6s，重发尝试，可能要等待75s的尝试并最终返回超时，才得知连接失败。即使是一次尝试成功，也会等待几毫秒到几秒的时间，如果此期间有其他事务要处理，则会白白浪费时间，而用非阻塞的connect 则可以做到并行，提高效率。
