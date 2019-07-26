@@ -224,7 +224,7 @@ B/B+树，hash索引，存储引擎MyISAM和InnoDB使用的B/B+树，MEMORY/Heap
         * long_query_time 查询超过多少秒才记录。 
     * cat查看慢日志
     * 用explain分析慢sql语句
-* explain优化
+* explain优化，实际上模拟优化器执行sql语句，查看mysql如何执行你的sql语句
     * table：显示这一行的数据是关于哪张表的
     * type：这是重要的列，显示连接使用了何种类型。从最好到最差的连接类型为const、eq_ref、ref、range、index和ALL，一般来说到range不错，最好到ref
         * all:full table scan ;MySQL将遍历全表以找到匹配的行；
